@@ -1,0 +1,17 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    environment:
+      - PORT=8080
+    volumes:
+      - .:/app
+      - /app/__pycache__
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

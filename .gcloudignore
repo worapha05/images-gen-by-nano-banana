@@ -1,0 +1,28 @@
+# Python 
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.env
+
+# Git
+.git/
+
+# OS files
+.DS_Store
+
+# Environment files
+.env.local
+.env.development
+.env.test
+.env.production
+.env.*.local
+.envrc
+
+# Docker files
+docker-compose.yml 
+
+# IDE files
+.vscode/
