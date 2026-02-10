@@ -5,6 +5,7 @@ import os
 import uuid
 import os
 from services import ImageGenService, ImageGenServiceError
+# from dotenv import load_dotenv
 
 router = APIRouter()
 
@@ -16,6 +17,7 @@ async def upload(
     aspect_ratio: str = Form(default=None),
     resolution: str = Form(default=None)):
 
+    # load_dotenv()
     api_key = os.getenv("GEMINI_API_IMAGE_KEY")
     image_gen_service = ImageGenService(api_key=api_key)
 
