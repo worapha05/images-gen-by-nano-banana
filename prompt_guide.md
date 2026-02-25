@@ -3,8 +3,6 @@
 ## Overview
 This guide explains how the AI Image Generation API automatically constructs prompts for creating educational illustrations based on different input scenarios.
 
----
-
 ## Quick Decision Tree
 ```
 Has Uploaded Images?
@@ -19,8 +17,6 @@ Has Uploaded Images?
    │  └─ NO → Use Random Default Prompt (8 options)
 ```
 
----
-
 ## Prompt Generation Logic
 
 The system automatically generates educational-focused prompts based on whether images are uploaded and whether custom prompts are provided.
@@ -29,29 +25,29 @@ The system automatically generates educational-focused prompts based on whether 
 
 **Single Image:**
 ```
-Using the uploaded image as reference, create an educational illustration: {user_prompt} Include educational elements like classrooms, books, students, teachers, learning materials, or academic settings while maintaining the visual style of the reference image.
+[EDUCATION-SAFE ONLY] Using the uploaded image as reference, create an educational illustration: {user_prompt} Include educational elements like classrooms, books, students, teachers, learning materials, or academic settings while maintaining the visual style of the reference image. Do NOT include any violence, weapons, blood, nudity, or inappropriate content.
 ```
 
 **Multiple Images:**
 ```
-Using the {image_count} uploaded images as references, create an educational illustration: {user_prompt} Combine visual styles from all images and integrate educational themes like learning environments, educational materials, students, teachers, and academic activities.
+[EDUCATION-SAFE ONLY] Using the {image_count} uploaded images as references, create an educational illustration: {user_prompt} Combine visual styles from all images and integrate educational themes like learning environments, educational materials, students, teachers, and academic activities. Do NOT include any violence, weapons, blood, nudity, or inappropriate content.
 ```
 
 ### 2. With Uploaded Images + No Custom Prompt
 
 **Single Image:**
 ```
-Transform this image into an educational context. Add educational elements like books, students, teachers, desks, whiteboards, learning materials, or classroom settings while maintaining the original style and composition.
+[EDUCATION-SAFE ONLY] Transform this image into an educational context. Add educational elements like books, students, teachers, desks, whiteboards, learning materials, or classroom settings while maintaining the original style and composition. Do NOT include any violence, weapons, blood, nudity, or inappropriate content.
 ```
 
 **Multiple Images:**
 ```
-Using these {image_count} images as inspiration, create an educational illustration that combines elements from all references. Include learning environments, educational materials, students engaged in learning activities, and academic settings.
+[EDUCATION-SAFE ONLY] Using these {image_count} images as inspiration, create an educational illustration that combines elements from all references. Include learning environments, educational materials, students engaged in learning activities, and academic settings. Do NOT include any violence, weapons, blood, nudity, or inappropriate content.
 ```
 
 ### 3. No Images + Custom Prompt
 ```
-Create an educational illustration: {user_prompt} Include learning environments (classroom, library, lab), educational materials (books, computers, supplies), and students or teachers in learning activities.
+[EDUCATION-SAFE ONLY] Create an educational illustration: {user_prompt} Include learning environments (classroom, library, lab), educational materials (books, computers, supplies), and students or teachers in learning activities. Do NOT include any violence, weapons, blood, nudity, or inappropriate content.
 ```
 
 ### 4. No Images + No Custom Prompt (Default Prompts)
@@ -99,3 +95,15 @@ The system randomly selects from these 8 pre-defined educational prompts:
    ```
    Generate an outdoor education scene with students and teachers in nature, observing plants and insects, taking notes, using magnifying glasses, and learning about ecosystems.
    ```
+
+## Safety System Prompt
+
+All generated prompts are prepended with a **Safety System Prompt** to ensure content is appropriate for educational use. This is applied automatically before every request to the AI model.
+
+- You are an educational image generator.
+- You MUST ONLY generate images that are safe, appropriate, and suitable for an educational platform used by students of all ages.
+- STRICTLY PROHIBITED content: violence, blood, gore, weapons, fighting, nudity, sexual content, drugs, alcohol, hate speech, horror, self-harm, gambling, or any content inappropriate for a school environment.
+- If the user's request conflicts with these rules, generate a safe educational alternative instead.
+- Always prioritize child-safe, educational, and positive imagery.
+
+This ensures that even if a user provides an inappropriate prompt, the model will generate a safe educational alternative instead.

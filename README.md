@@ -13,10 +13,11 @@ This is a FastAPI-based API for image generation. It allows users to upload an i
 
 ```
 .
-├── docker-compose.yml
+├── .env.example
+├── config.py
 ├── Dockerfile
+├── docker-compose.yml
 ├── main.py
-├── README.md
 ├── requirements.txt
 ├── middleware/
 │   ├── __init__.py
@@ -29,29 +30,37 @@ This is a FastAPI-based API for image generation. It allows users to upload an i
     └── image_gen.py
 ```
 
-## Installation
+## Local Development Setup
 
 1.  **Clone the repository:**
     ```bash
     git clone <repository-url>
-    cd nano-banana
+    cd <repository-name>
     ```
-
-2.  **Install dependencies:**
-    Make sure you have Python 3.8+ installed.
+2.  **Create a `.env` file in the project root directory**
     ```bash
-    pip install -r requirements.txt
+    GEMINI_API_IMAGE_KEY=your_gemini_api_key_here
+    ```
+3.  **Build and run the project with Docker Compose**
+    ```bash
+    docker compose up -d --build
     ```
 
-## Running the Application
+    ### Running the Application
 
-To run the application locally, use `uvicorn`:
+    To run the application, use `docker compose` without rebuilding the image:
 
-```bash
-uvicorn main:app --reload
-```
+    ```bash
+    docker compose up -d
+    ```
 
-The API will be available at `http://127.0.0.1:8000`.
+    The API will be available at `http://127.0.0.1:8080`.
+
+    ### Stop the Application
+
+    ```bash
+    docker compose down
+    ```
 
 ## API Endpoints
 
