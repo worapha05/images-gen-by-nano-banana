@@ -1,28 +1,27 @@
-# Python 
+# ignore files
+.git/
+.gitignore
+.dockerignore
+.gcloudignore
+
+# Python
 __pycache__/
 *.py[cod]
-*$py.class
-.venv/
 venv/
 env/
+.venv/
+
+# Docker
+docker-compose.yml
+
+# Secrets
 .env
+.env.example
 
-# Git
-.git/
+# Documents
+*.md
 
-# OS files
-.DS_Store
-
-# Environment files
-.env.local
-.env.development
-.env.test
-.env.production
-.env.*.local
-.envrc
-
-# Docker files
-docker-compose.yml 
-
-# IDE files
+# IDE & OS 
 .vscode/
+.idea/
+.DS_Store
