@@ -5,21 +5,19 @@ import os
 import uuid
 import os
 from services import ImageGenService, ImageGenServiceError
-# from dotenv import load_dotenv
+from config import settings
 
 router = APIRouter()
 
 @router.post("/images-gen")
-async def upload(
+async def generate_image(
     request: Request,  
     files: List[UploadFile] = File(default=[]),
     prompt: str = Form(default=None),
     aspect_ratio: str = Form(default=None),
     resolution: str = Form(default=None)):
 
-    # load_dotenv()
-    api_key = os.getenv("GEMINI_API_IMAGE_KEY")
-    image_gen_service = ImageGenService(api_key=api_key)
+    image_gen_service = ImageGenService(api_key=settings.gemini_api_image_key)
 
     api_version = request.headers.get("x-api-version", None)
     correlation_id = request.headers.get("x-correlation-id", None)
@@ -54,8 +52,8 @@ async def upload(
                 valid_files.append(file)
             else:
                 raise ImageGenServiceError(
-                    f"Invalid content type: {file.content_type} not supported. allowed types are image/jpeg, image/png",
-                    code="INVALID_CONTENT_TYPE"
+                    message=f"Invalid content type: {file.content_type} not supported. allowed types are image/jpeg, image/png",
+                    code="INVALID_FILE_TYPE"
                 )
 
     except ImageGenServiceError as e:
