@@ -5,7 +5,7 @@ from middleware import ResponseTimeMiddleware
 
 app = FastAPI(
     title="Image Gen API",
-    description="Upload รูป → ส่งกลับ client",
+    description="API for generating images using Gemini",
     version="1.0.0"
 )
 
@@ -22,7 +22,7 @@ app.add_middleware(ResponseTimeMiddleware)
 app.include_router(image_gen.router)
 
 @app.get("/")
-async def root():
+async def info():
     return {
         "message": "Image Gen API",
         "version": "1.0.0",
