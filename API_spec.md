@@ -246,12 +246,14 @@ Headers always echo `X-Correlation-Id`, `X-API-Version` and `X-Response-Time-Sec
 ```
 
 **Other Status Codes**
-- `400` Invalid API version (`INVALID_FIELD_VALUE`)
-- `415` Unsupported media image type (`INVALID_FILE_TYPE`)
+- `400` Unsupported X-API-Version (`INVALID_FIELD_VALUE`)
+- `413` Number of uploaded files exceeds the limit (`TOO_MANY_FILES`)
+- `413` File size exceeds the limit (`FILE_TOO_LARGE`)
+- `415` Invalid content type, not supported (`INVALID_FILE_TYPE`)
 - `500` Cannot convert uploaded images to bytes (`IMAGE_CONVERSION_ERROR`)
-- `500` Model returned no image, blocked or empty response (`NO_IMAGE_RETURNED`)
+- `500` Model returned no image, blocked or empty (`NO_IMAGE_RETURNED`)
 - `500` Cannot process image bytes (`IMAGE_PROCESSING_ERROR`)
-- `500` Unexpected pipeline failure (`INTERNAL_ERROR`)
+- `500` Unexpected internal error (`INTERNAL_ERROR`)
 
 ## 3) Standard Error Format
 
