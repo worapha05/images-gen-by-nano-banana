@@ -45,6 +45,31 @@ async def generate_image(
         "x-api-version": api_version
     }
 
+    if len(files) > settings.total_files:
+        return JSONResponse(
+            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
+            headers=headers,
+            content={
+                    "code": "TOO_MANY_FILES", 
+                    "message": f"Number of uploaded files exceeds the maximum allowed limit of {settings.total_files}.",
+                    "correlationId": correlation_id
+                },
+        )
+
+    for file in files:
+        file_size = file.size * settings.bytes_to_mb
+        if file_size > settings.max_file_size_bytes:
+            return JSONResponse(
+                status_code=status.HTTP_413_CONTENT_TOO_LARGE,
+                headers=headers,
+                content={
+                        "code": "FILE_TOO_LARGE", 
+                        "message": f"File size exceeds the maximum allowed limit of {settings.file_limit_mb}MB.",
+                        "correlationId": correlation_id
+                    },
+            )
+
+
     valid_files = []
     try:
         for file in files:
@@ -73,7 +98,7 @@ async def generate_image(
             headers=headers,
             content={
                 "code": "INTERNAL_ERROR", 
-                "message": f"Internal server error: {str(e)}",
+                "message": "An unexpected internal error occurred. Please try again later.",
                 "correlationId": correlation_id
             },
         )
@@ -120,7 +145,7 @@ async def generate_image(
             headers=headers,
             content={
                 "code": "INTERNAL_ERROR", 
-                "message": f"Internal server error: {str(e)}",
+                "message": "An unexpected internal error occurred. Please try again later.",
                 "correlationId": correlation_id
             },
         )
