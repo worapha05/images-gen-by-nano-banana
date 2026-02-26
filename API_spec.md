@@ -81,8 +81,16 @@ AI-powered image generation service that accepts uploaded image files and text p
     ```
 
 2. **Open root folder**
+    ```bash
+    cd <repository-name>
+    ```
 
-3. **Deploy to Cloud Run**
+3. **(Optional) Check PROJECT_ID before deploy service**
+    ```bash
+    gcloud config get-value project
+    ```
+
+4. **Deploy to Cloud Run**
     ```bash
     gcloud run deploy <SERVICE_NAME> \
       --source . \
@@ -91,24 +99,29 @@ AI-powered image generation service that accepts uploaded image files and text p
       --allow-unauthenticated
     ```
 
-**Note:** Replace `<PROJECT_ID>`, `<SERVICE_NAME>`, `<REGION_NAME>`, and `<SECRET_KEY_NAME>` with your actual values.
+**Note:** Replace `<PROJECT_ID>`, `<SERVICE_NAME>`, `<REGION_NAME>`, `<SECRET_KEY_NAME>` and `<repository-name>` with your actual values.
 
 ## Creation of SECRET_KEY in GCP
 
 Before deploying to Cloud Run with `--set-secrets`, you must create a secret in **Google Cloud Secret Manager**.
 
-1. **Authenticate with Google Cloud**
+1. **Authenticate with Google Cloud** (skip if already authenticated)
     ```bash
     gcloud auth login
     gcloud config set project <PROJECT_ID>
     ```
 
-2. **Enable the Secret Manager API** (if not already enabled)
+2. **(Optional) Check PROJECT_ID before add SECRET_KEY**
+    ```bash
+    gcloud config get-value project
+    ```
+
+3. **Enable the Secret Manager API** (if not already enabled)
     ```bash
     gcloud services enable secretmanager.googleapis.com
     ```
 
-3. **Create a new secret with your Gemini API key**
+4. **Create a new secret with your Gemini API key**
     ```bash
     echo -n "<SECRET_KEY_VALUE>" | \
       gcloud secrets create <SECRET_KEY_NAME> \
@@ -116,30 +129,30 @@ Before deploying to Cloud Run with `--set-secrets`, you must create a secret in 
         --data-file=-
     ```
 
-4. **Verify the secret was created**
+5. **Verify the secret was created**
     ```bash
     gcloud secrets list
     ```
 
-5. **Grant Cloud Run access to the secret** (if needed)
+6. **Grant Cloud Run access to the secret** (if needed)
     ```bash
     gcloud secrets add-iam-policy-binding <SECRET_KEY_NAME> \
       --member="serviceAccount:<PROJECT_NUMBER>-compute@developer.gserviceaccount.com" \
       --role="roles/secretmanager.secretAccessor"
     ```
 
-6. **(Optional) Update an existing secret version**
+7. **(Optional) Update an existing secret version**
     ```bash
     echo -n "<NEW_SECRET_KEY_VALUE>" | \
       gcloud secrets versions add <SECRET_KEY_NAME> --data-file=-
     ```
 
-7. **(Optional) Destroy an existing secret version**
+8. **(Optional) Destroy an existing secret version**
     ```bash
     gcloud secrets versions destroy <SECRET_KEY_VERSION> --secret="<SECRET_KEY_NAME>"
     ```
 
-8. **(Optional) Check versions of SECRET_KEY**
+9. **(Optional) Check versions of SECRET_KEY**
     ```bash
     gcloud secrets versions list <SECRET_KEY_NAME>
     ```
