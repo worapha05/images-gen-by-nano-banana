@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, UploadFile, File, Form, Request, status
 from fastapi.responses import JSONResponse
 from typing import List
@@ -7,11 +8,16 @@ import os
 from services import ImageGenService, ImageGenServiceError
 from config import settings
 
+logger = logging.getLogger(__name__)
+
+MAX_FILES = 5
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+
 router = APIRouter()
 
 @router.post("/images-gen")
 async def generate_image(
-    request: Request,  
+    request: Request,
     files: List[UploadFile] = File(default=[]),
     prompt: str = Form(default=None),
     aspect_ratio: str = Form(default=None),
@@ -23,8 +29,8 @@ async def generate_image(
     correlation_id = request.headers.get("x-correlation-id", None)
 
     if correlation_id is None:
-        correlation_id = f"corr_{uuid.uuid4()}"    
-    
+        correlation_id = f"corr_{uuid.uuid4()}"
+
     headers = {
         "x-correlation-id": correlation_id
     }
@@ -34,7 +40,7 @@ async def generate_image(
             status_code=status.HTTP_400_BAD_REQUEST,
             headers=headers,
             content={
-                    "code": "INVALID_FIELD_VALUE", 
+                    "code": "INVALID_FIELD_VALUE",
                     "message": f"Unsupported X-API-Version: {api_version}",
                     "correlationId": correlation_id
                 },
@@ -45,9 +51,28 @@ async def generate_image(
         "x-api-version": api_version
     }
 
+    if len(files) > MAX_FILES:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            headers=headers,
+            content={
+                "code": "TOO_MANY_FILES",
+                "message": f"Number of uploaded files exceeds the maximum allowed limit of {MAX_FILES}.",
+                "correlationId": correlation_id
+            },
+        )
+
     valid_files = []
     try:
         for file in files:
+            content = await file.read()
+            if len(content) > MAX_FILE_SIZE:
+                raise ImageGenServiceError(
+                    message="File size exceeds the maximum allowed limit of 10MB.",
+                    code="FILE_TOO_LARGE"
+                )
+            await file.seek(0)
+
             if image_gen_service.is_valid_image_type(file.content_type):
                 valid_files.append(file)
             else:
@@ -57,30 +82,35 @@ async def generate_image(
                 )
 
     except ImageGenServiceError as e:
+        if e.code == "FILE_TOO_LARGE":
+            error_status = status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
+        else:
+            error_status = status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
         return JSONResponse(
-            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            status_code=error_status,
             headers=headers,
             content={
-                "code": e.code, 
+                "code": e.code,
                 "message": e.message,
                 "correlationId": correlation_id
             },
         )
-    
+
     except Exception as e:
+        logger.exception("Unexpected error during file validation. correlationId=%s", correlation_id)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             headers=headers,
             content={
-                "code": "INTERNAL_ERROR", 
-                "message": f"Internal server error: {str(e)}",
+                "code": "INTERNAL_ERROR",
+                "message": "An unexpected internal error occurred. Please try again later.",
                 "correlationId": correlation_id
             },
         )
 
     try:
         files_bytes = await image_gen_service.convert_files_to_bytes(files=valid_files)
-        
+
         final_prompt = image_gen_service.create_prompt(
             prompt=prompt,
             files=valid_files
@@ -102,25 +132,26 @@ async def generate_image(
         }
 
         return JSONResponse(content=contents, headers=headers)
-    
+
     except ImageGenServiceError as e:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             headers=headers,
             content={
-                "code": e.code, 
+                "code": e.code,
                 "message": e.message,
                 "correlationId": correlation_id
             },
         )
-    
+
     except Exception as e:
+        logger.exception("Unexpected error during image generation. correlationId=%s", correlation_id)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             headers=headers,
             content={
-                "code": "INTERNAL_ERROR", 
-                "message": f"Internal server error: {str(e)}",
+                "code": "INTERNAL_ERROR",
+                "message": "An unexpected internal error occurred. Please try again later.",
                 "correlationId": correlation_id
             },
         )
